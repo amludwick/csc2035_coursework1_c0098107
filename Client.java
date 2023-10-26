@@ -140,7 +140,6 @@ public class Client {
 	public void sendMetaData(int portNumber, InetAddress IPAddress, File file, String outputFile) throws IOException {
 
 		MetaData metaData = new MetaData();
-
 		metaData.setName(outputFile);
 		metaData.setSize((int) file.length());
 
@@ -155,19 +154,14 @@ public class Client {
 
 		System.out.println("MetaData information is sent");
 
-		//byte[] incomingData = new byte[1024];
-		//DatagramPacket receivedPacket = new DatagramPacket(incomingData, incomingData.length);
-		//socket.receive(receivedPacket);
-		//String response = new String(receivedPacket.getData()).trim();
-		//System.out.println("Response from server: " + response);
-
-		//exitErr("sendMetaData is not implemented");
 	}
-
 
 	/* TODO: Send the file to the server without corruption*/
 	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) {
-		exitErr("sendFileNormal is not implemented");
+
+
+
+		//exitErr("sendFileNormal is not implemented");
 	} 
 
 	/* TODO: This function is essentially the same as the sendFileNormal function
