@@ -1,7 +1,4 @@
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.*;
 import java.util.Scanner;
 
@@ -157,9 +154,22 @@ public class Client {
 	}
 
 	/* TODO: Send the file to the server without corruption*/
-	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) {
+	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) throws IOException {
 
+		BufferedReader br = new BufferedReader(new FileReader(file));
 
+		String readfile;
+
+		while ((readfile = br.readLine()) !=null) {
+			System.out.println(readfile);
+		}
+
+		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+		//byte[] buffer = new byte[1024];
+		//DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+		//String response = new String(receivedPacket.getData()).trim();
+		//System.out.println("Response from server: " + response);
 
 		//exitErr("sendFileNormal is not implemented");
 	} 
