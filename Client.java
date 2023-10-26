@@ -1,5 +1,7 @@
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.Scanner;
 
@@ -135,8 +137,31 @@ public class Client {
 	/* TODO: send metadata (file size and file name to create) to the server 
 	 * outputFile: is the name of the file that the server will create
 	*/
-	public void sendMetaData(int portNumber, InetAddress IPAddress, File file, String outputFile) {
-		exitErr("sendMetaData is not implemented");
+	public void sendMetaData(int portNumber, InetAddress IPAddress, File file, String outputFile) throws IOException {
+
+		MetaData metaData = new MetaData();
+
+		metaData.setName(outputFile);
+		metaData.setSize((int) file.length());
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
+		objectStream.writeObject(metaData);
+
+		byte[] data = outputStream.toByteArray();
+		DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
+		socket = new DatagramSocket();
+		socket.send(sentPacket);
+
+		System.out.println("MetaData information is sent");
+
+		//byte[] incomingData = new byte[1024];
+		//DatagramPacket receivedPacket = new DatagramPacket(incomingData, incomingData.length);
+		//socket.receive(receivedPacket);
+		//String response = new String(receivedPacket.getData()).trim();
+		//System.out.println("Response from server: " + response);
+
+		//exitErr("sendMetaData is not implemented");
 	}
 
 
