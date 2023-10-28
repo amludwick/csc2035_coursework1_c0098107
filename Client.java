@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Client {
@@ -156,13 +157,31 @@ public class Client {
 	/* TODO: Send the file to the server without corruption*/
 	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) throws IOException {
 
-		BufferedReader br = new BufferedReader(new FileReader(file));
-
+		StringBuilder content = new StringBuilder();
+		byte[] bytes = new byte[content.length()];
+		CharArrayWriter charArrayWriter = new CharArrayWriter();
 		String readfile;
 
+		BufferedReader br = new BufferedReader(new FileReader(file));
+
 		while ((readfile = br.readLine()) !=null) {
-			System.out.println(readfile);
+			content.append(readfile);
 		}
+
+		for (int i = 0, n = content.length(); i < n ; i++) {
+			char c = content.charAt(i);
+			charArrayWriter.append(c);
+			byte b = (byte)c;
+			System.out.println(b);
+			System.out.println(c);
+		}
+
+		charArrayWriter.toCharArray();
+
+		//System.out.println(new String(charArrayWriter.toCharArray()).getBytes());
+
+
+
 
 		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
