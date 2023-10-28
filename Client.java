@@ -176,18 +176,24 @@ public class Client {
 			charArrayWriter.append(c);
 			byte b = (byte)c;
 			buff.put(b);
-			System.out.println(b);
-			System.out.println(c);
+			//System.out.println(b);
+			//System.out.println(c);
 		}
 
-		System.out.println(buff);
-
 		byte[] combination = buff.array();
-		System.out.println(combination);
+
+		String converted = new String(combination, StandardCharsets.UTF_8);
+		System.out.println(converted);
+
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		byte[] data = combination;
+		DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
+		socket = new DatagramSocket();
+		socket.send(sentPacket);
+
+		System.out.println("File is sent as normal");
 
 		//System.out.println(new String(charArrayWriter.toCharArray()).getBytes());
-
-		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
 		//byte[] buffer = new byte[1024];
 		//DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
