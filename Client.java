@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Client {
@@ -158,7 +160,8 @@ public class Client {
 	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) throws IOException {
 
 		StringBuilder content = new StringBuilder();
-		byte[] bytes = new byte[content.length()];
+		byte[] byteArray = new byte[256];
+		ByteBuffer buff = ByteBuffer.wrap(byteArray);
 		CharArrayWriter charArrayWriter = new CharArrayWriter();
 		String readfile;
 
@@ -172,16 +175,17 @@ public class Client {
 			char c = content.charAt(i);
 			charArrayWriter.append(c);
 			byte b = (byte)c;
+			buff.put(b);
 			System.out.println(b);
 			System.out.println(c);
 		}
 
-		charArrayWriter.toCharArray();
+		System.out.println(buff);
+
+		byte[] combination = buff.array();
+		System.out.println(combination);
 
 		//System.out.println(new String(charArrayWriter.toCharArray()).getBytes());
-
-
-
 
 		//ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
