@@ -159,6 +159,26 @@ public class Client {
 	/* TODO: Send the file to the server without corruption*/
 	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) throws IOException {
 
+		try {
+			DatagramSocket clientSocket = new DatagramSocket();
+		}
+
+		catch (SocketException e) {
+			System.err.println("the socket could not be opened, or the socket could not bind to the specified port " +
+					portNumber);
+			System.exit(1);
+		}
+
+		try {
+			Scanner sc = new Scanner(file);
+			}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+
+
 		StringBuilder content = new StringBuilder();
 		byte[] byteArray = new byte[256];
 		ByteBuffer buff = ByteBuffer.wrap(byteArray);
@@ -171,25 +191,6 @@ public class Client {
 			content.append(readfile);
 		}
 
-		for (int i = 0, n = content.length(); i < n ; i++) {
-			char c = content.charAt(i);
-			charArrayWriter.append(c);
-			byte b = (byte)c;
-			buff.put(b);
-			//System.out.println(b);
-			//System.out.println(c);
-		}
-
-		byte[] combination = buff.array();
-
-		String converted = new String(combination, StandardCharsets.UTF_8);
-		System.out.println(converted);
-
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		byte[] data = combination;
-		DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
-		socket = new DatagramSocket();
-		socket.send(sentPacket);
 
 		System.out.println("File is sent as normal");
 
