@@ -154,13 +154,17 @@ public class Client {
 
 		System.out.println("MetaData information is sent");
 
+		socket.close();
+
 	}
 
 	/* TODO: Send the file to the server without corruption*/
 	public void sendFileNormal(int portNumber, InetAddress IPAddress, File file) throws IOException {
 
+		DatagramSocket clientSocket = null;
+
 		try {
-			DatagramSocket clientSocket = new DatagramSocket();
+			clientSocket = new DatagramSocket();
 		}
 
 		catch (SocketException e) {
@@ -169,30 +173,30 @@ public class Client {
 			System.exit(1);
 		}
 
+		Scanner sc = null;
+
 		try {
-			Scanner sc = new Scanner(file);
+			sc = new Scanner(file);
 			}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 
+		String input = "";
 
-
-		StringBuilder content = new StringBuilder();
-		byte[] byteArray = new byte[256];
-		ByteBuffer buff = ByteBuffer.wrap(byteArray);
-		CharArrayWriter charArrayWriter = new CharArrayWriter();
-		String readfile;
-
-		BufferedReader br = new BufferedReader(new FileReader(file));
-
-		while ((readfile = br.readLine()) !=null) {
-			content.append(readfile);
+		if (sc.hasNextLine()){
+			input = sc.nextLine();
+		} else {
+			System.err.println("Input File is empty");
+			System.exit(0);
 		}
 
+		while (sc.hasNextLine()){
+			input = input + "\n" + sc.nextLine();
+		}
 
-		System.out.println("File is sent as normal");
+		input.getBytes();
 
 		//System.out.println(new String(charArrayWriter.toCharArray()).getBytes());
 
