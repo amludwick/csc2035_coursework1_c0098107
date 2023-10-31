@@ -220,11 +220,21 @@ public class Client {
 			ListOfByteSegments.add(temp);
 		}
 
+		Segment segment = new Segment();
+
+		for (int i = 0; i >  ) {
+
+		}
+
 		//turn bytes into segments (for loop segement)
 
-		//send segements
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
+		objectStream.writeObject(segment);
 
-
+		byte[] data = outputStream.toByteArray();
+		DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
+		clientSocket.send(sentPacket);
 
 		System.out.println("File is sent as normal");
 
