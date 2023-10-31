@@ -1,6 +1,5 @@
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -233,18 +232,50 @@ public class Client {
 
 		//turn bytes into segments (for loop segement)
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
-		ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
-		objectStream.writeObject(segments[i]);
+		byte[] ackBuffer = new byte[1024];
+		DatagramPacket receivedPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
+		Segment ack;
 
-		byte[] data = outputStream.toByteArray();
-		DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
-		clientSocket.send(sentPacket);
+		for (int i = 0; i < segments.length; i++) {
 
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+
+			ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
+
+			objectStream.writeObject(segments[i]);
+
+			byte[] data = outputStream.toByteArray();
+
+			DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
+
+			clientSocket.send(sentPacket);
+			clientSocket.receive(receivedPacket);
+
+			byte[] incomingData = receivedPacket.getData();
+			ByteArrayInputStream in = new ByteArrayInputStream(incomingData);
+			ObjectInputStream out = new ObjectInputStream(in);
+
+			try{
+				ack = (Segment) out.readObject();
+				if (ack.getType() == SegmentType.Ack && ack.getSq() == segments[i].getSq())
+					System.out.println("Ack is recieved" + ack.getSq());
+				else {
+					System.out.println("ack not recieved");
+					System.exit(1);
+				}
+
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			}
+
+
+
+		}
+
+		clientSocket.close();
 		System.out.println("File is sent as normal");
 
-		//byte[] buffer = new byte[1024];
-		//DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
+
 		//String response = new String(receivedPacket.getData()).trim();
 		//System.out.println("Response from server: " + response);
 
