@@ -220,17 +220,22 @@ public class Client {
 			ListOfByteSegments.add(temp);
 		}
 
-		Segment segment = new Segment();
+		Segment[] segments = new Segment[ListOfByteSegments.size()];
 
-		for (int i = 0; i >  ) {
-
+		for (int i = 0; i < segments.length; i++) {
+			segments[i] = new Segment();
+			segments[i].setPayLoad((new String(ListOfByteSegments.get(i), StandardCharsets.UTF_8)).replaceAll("\0", ""));
+			//.set size(4)
+			//.set type (segtype.data)
+			//.set sq(i % 2)
+			segments[i].setChecksum(checksum(segments[i].getPayLoad(), false));
 		}
 
 		//turn bytes into segments (for loop segement)
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 		ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
-		objectStream.writeObject(segment);
+		objectStream.writeObject(segments[i]);
 
 		byte[] data = outputStream.toByteArray();
 		DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
