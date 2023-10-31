@@ -3,6 +3,7 @@ import java.net.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Client {
@@ -196,9 +197,36 @@ public class Client {
 			input = input + "\n" + sc.nextLine();
 		}
 
-		input.getBytes();
+		byte[] inputbytes = input.getBytes();
+		List<byte[]> ListOfByteSegments = new ArrayList<byte[]>();
 
-		//System.out.println(new String(charArrayWriter.toCharArray()).getBytes());
+		int count = 0;
+
+		byte[] temp = new byte[4];
+
+		for (int i = 0; i < inputbytes.length; i++) {
+
+			if (count == 4){
+				ListOfByteSegments.add(temp);
+				count = 0;
+				temp = new byte[4];
+			}
+
+			temp[count] = inputbytes[i];
+			count++;
+		}
+
+		if (count != 0){
+			ListOfByteSegments.add(temp);
+		}
+
+		//turn bytes into segments (for loop segement)
+
+		//send segements
+
+
+
+		System.out.println("File is sent as normal");
 
 		//byte[] buffer = new byte[1024];
 		//DatagramPacket receivedPacket = new DatagramPacket(buffer, buffer.length);
