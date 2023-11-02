@@ -224,9 +224,9 @@ public class Client {
 		for (int i = 0; i < segments.length; i++) {
 			segments[i] = new Segment();
 			segments[i].setPayLoad((new String(ListOfByteSegments.get(i), StandardCharsets.UTF_8)).replaceAll("\0", ""));
-			//.set size(4)
-			//.set type (segtype.data)
-			//.set sq(i % 2)
+			segments[i].setSize(4);
+			segments[i].setType(SegmentType.Data);
+			segments[i].setSq(i % 2);
 			segments[i].setChecksum(checksum(segments[i].getPayLoad(), false));
 		}
 
@@ -267,8 +267,6 @@ public class Client {
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-
-
 
 		}
 
