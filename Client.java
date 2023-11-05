@@ -168,15 +168,15 @@ public class Client {
 		}
 
 		catch (SocketException e) {
-			System.err.println("the socket could not be opened, or the socket could not bind to the specified port " +
+			System.err.println("The socket couldn't be connected or bind to the specified port " +
 					portNumber);
 			System.exit(1);
 		}
 
-		Scanner sc = null;
+		Scanner reader = null;
 
 		try {
-			sc = new Scanner(file);
+			reader = new Scanner(file);
 			}
 		catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -185,15 +185,15 @@ public class Client {
 
 		String input = "";
 
-		if (sc.hasNextLine()){
-			input = sc.nextLine();
+		if (reader.hasNextLine()){
+			input = reader.nextLine();
 		} else {
 			System.err.println("Input File is empty");
 			System.exit(0);
 		}
 
-		while (sc.hasNextLine()){
-			input = input + "\n" + sc.nextLine();
+		while (reader.hasNextLine()){
+			input = input + "\n" + reader.nextLine();
 		}
 
 		byte[] inputbytes = input.getBytes();
@@ -284,7 +284,43 @@ public class Client {
 	 *      except that it resends data segments if no ACK for a segment is 
 	 *      received from the server.*/
 	public void sendFileWithTimeOut(int portNumber, InetAddress IPAddress, File file, float loss) {
-		exitErr("sendFileWithTimeOut is not implemented");
+
+		DatagramSocket clientSocket = null;
+
+		try {
+			clientSocket = new DatagramSocket();
+		}
+
+		catch (SocketException e) {
+			System.err.println("The socket couldn't be connected or bind to the specified port " +
+					portNumber);
+			System.exit(1);
+		}
+
+		Scanner reader = null;
+
+		try {
+			reader = new Scanner(file);
+		}
+		catch (FileNotFoundException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+
+		String input = "";
+
+		if (reader.hasNextLine()){
+			input = reader.nextLine();
+		} else {
+			System.err.println("Input File is empty");
+			System.exit(0);
+		}
+
+		while (reader.hasNextLine()){
+			input = input + "\n" + reader.nextLine();
+		}
+
+		//exitErr("sendFileWithTimeOut is not implemented");
 	} 
 
 
