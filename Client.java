@@ -197,37 +197,37 @@ public class Client {
 		}
 
 		byte[] inputbytes = input.getBytes();
+
 		List<byte[]> ListOfByteSegments = new ArrayList<byte[]>();
 
-		int count = 0;
+		int charCount = 0;
 
-		byte[] temp = new byte[4];
+		byte[] tempSegmentedByte = new byte[4];
 
 		for (int i = 0; i < inputbytes.length; i++) {
 
-			if (count == 4){
-				ListOfByteSegments.add(temp);
-				count = 0;
-				temp = new byte[4];
+			if (charCount == 4){
+				ListOfByteSegments.add(tempSegmentedByte);
+				charCount = 0;
+				tempSegmentedByte = new byte[4];
 			}
 
-			temp[count] = inputbytes[i];
-			count++;
+			tempSegmentedByte[charCount] = inputbytes[i]; charCount++;
 		}
 
-		if (count != 0){
-			ListOfByteSegments.add(temp);
+		if (charCount != 0){
+			ListOfByteSegments.add(tempSegmentedByte);
 		}
 
-		Segment[] segments = new Segment[ListOfByteSegments.size()];
+		Segment[] segmentsArray = new Segment[ListOfByteSegments.size()];
 
-		for (int i = 0; i < segments.length; i++) {
-			segments[i] = new Segment();
-			segments[i].setPayLoad((new String(ListOfByteSegments.get(i), StandardCharsets.UTF_8)).replaceAll("\0", ""));
-			segments[i].setSize(4);
-			segments[i].setType(SegmentType.Data);
-			segments[i].setSq(i % 2);
-			segments[i].setChecksum(checksum(segments[i].getPayLoad(), false));
+		for (int i = 0; i < segmentsArray.length; i++) {
+			segmentsArray[i] = new Segment();
+			segmentsArray[i].setSize(4);
+			segmentsArray[i].setSq(i % 2);
+			segmentsArray[i].setType(SegmentType.Data);
+			segmentsArray[i].setPayLoad((new String(ListOfByteSegments.get(i), StandardCharsets.UTF_8)).replaceAll("\0", ""));
+			segmentsArray[i].setChecksum(checksum(segmentsArray[i].getPayLoad(), false));
 		}
 
 		//turn bytes into segments (for loop segement)
@@ -236,13 +236,13 @@ public class Client {
 		DatagramPacket receivedPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
 		Segment ack;
 
-		for (int i = 0; i < segments.length; i++) {
+		for (int i = 0; i < segmentsArray.length; i++) {
 
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 
 			ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
 
-			objectStream.writeObject(segments[i]);
+			objectStream.writeObject(segmentsArray[i]);
 
 			byte[] data = outputStream.toByteArray();
 
@@ -257,7 +257,7 @@ public class Client {
 
 			try{
 				ack = (Segment) out.readObject();
-				if (ack.getType() == SegmentType.Ack && ack.getSq() == segments[i].getSq())
+				if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq())
 					System.out.println("Ack is recieved" + ack.getSq());
 				else {
 					System.out.println("ack not recieved");
@@ -318,6 +318,40 @@ public class Client {
 
 		while (reader.hasNextLine()){
 			input = input + "\n" + reader.nextLine();
+		}
+
+		byte[] inputbytes = input.getBytes();
+
+		List<byte[]> ListOfByteSegments = new ArrayList<byte[]>();
+
+		int charCount = 0;
+
+		byte[] tempSegmentedByte = new byte[4];
+
+		for (int i = 0; i < inputbytes.length; i++) {
+
+			if (charCount == 4){
+				ListOfByteSegments.add(tempSegmentedByte);
+				charCount = 0;
+				tempSegmentedByte = new byte[4];
+			}
+
+			tempSegmentedByte[charCount] = inputbytes[i]; charCount++;
+		}
+
+		if (charCount != 0){
+			ListOfByteSegments.add(tempSegmentedByte);
+		}
+
+		Segment[] segmentsArray = new Segment[ListOfByteSegments.size()];
+
+		for (int i = 0; i < segmentsArray.length; i++) {
+			segmentsArray[i] = new Segment();
+			segmentsArray[i].setSize(4);
+			segmentsArray[i].setSq(i % 2);
+			segmentsArray[i].setType(SegmentType.Data);
+			segmentsArray[i].setPayLoad((new String(ListOfByteSegments.get(i), StandardCharsets.UTF_8)).replaceAll("\0", ""));
+			segmentsArray[i].setChecksum(checksum(segmentsArray[i].getPayLoad(), isCorrupted(loss)));
 		}
 
 		//exitErr("sendFileWithTimeOut is not implemented");
