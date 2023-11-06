@@ -230,8 +230,6 @@ public class Client {
 			segmentsArray[i].setChecksum(checksum(segmentsArray[i].getPayLoad(), false));
 		}
 
-		//turn bytes into segments (for loop segement)
-
 		byte[] ackBuffer = new byte[1024];
 		DatagramPacket receivedPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
 		Segment ack;
@@ -256,16 +254,24 @@ public class Client {
 			ObjectInputStream out = new ObjectInputStream(in);
 
 			try{
+
 				ack = (Segment) out.readObject();
+
 				if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq())
-					System.out.println("Ack is recieved" + ack.getSq());
+
+					System.out.println("Acknowledgment is Recieved" + ack.getSq());
+
 				else {
-					System.out.println("ack not recieved");
+
+					System.out.println("Acknowledgement is not recieved");
+
 					System.exit(1);
 				}
 
 			} catch (ClassNotFoundException e) {
+
 				e.printStackTrace();
+
 			}
 
 		}
@@ -283,7 +289,7 @@ public class Client {
 	/* TODO: This function is essentially the same as the sendFileNormal function
 	 *      except that it resends data segments if no ACK for a segment is 
 	 *      received from the server.*/
-	public void sendFileWithTimeOut(int portNumber, InetAddress IPAddress, File file, float loss) {
+	public void sendFileWithTimeOut(int portNumber, InetAddress IPAddress, File file, float loss) throws IOException {
 
 		DatagramSocket clientSocket = null;
 
@@ -330,7 +336,7 @@ public class Client {
 
 		for (int i = 0; i < inputbytes.length; i++) {
 
-			if (charCount == 4){
+			if (charCount == 4) {
 				ListOfByteSegments.add(tempSegmentedByte);
 				charCount = 0;
 				tempSegmentedByte = new byte[4];
@@ -353,6 +359,68 @@ public class Client {
 			segmentsArray[i].setPayLoad((new String(ListOfByteSegments.get(i), StandardCharsets.UTF_8)).replaceAll("\0", ""));
 			segmentsArray[i].setChecksum(checksum(segmentsArray[i].getPayLoad(), isCorrupted(loss)));
 		}
+
+		System.out.println(isCorrupted(loss));
+
+		if (isCorrupted(loss) == true) {
+			System.out.println("Segments corruption has occurred");
+		} else {
+			System.out.println("Segments corruption has not occurred");
+		}
+
+		byte[] ackBuffer = new byte[1024];
+		DatagramPacket receivedPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
+		Segment ack;
+
+		int tryCount = 0;
+
+		while (tryCount != 4) {
+
+			tryCount = tryCount + 1;
+
+			System.out.println(tryCount);
+
+			for (int i = 0; i < segmentsArray.length; i++) {
+
+				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+
+				ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
+
+				objectStream.writeObject(segmentsArray[i]);
+
+				byte[] data = outputStream.toByteArray();
+
+				DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
+
+				clientSocket.send(sentPacket);
+				clientSocket.receive(receivedPacket);
+
+				byte[] incomingData = receivedPacket.getData();
+				ByteArrayInputStream in = new ByteArrayInputStream(incomingData);
+				ObjectInputStream out = new ObjectInputStream(in);
+
+				try {
+
+					ack = (Segment) out.readObject();
+
+					if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq())
+
+						System.out.println("Acknowledgement is recieved" + ack.getSq());
+
+					else {
+						System.out.println("Acknowledgement is not recieved");
+					}
+
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+			}
+
+			clientSocket.close();
+
+		}
+
+
 
 		//exitErr("sendFileWithTimeOut is not implemented");
 	} 
