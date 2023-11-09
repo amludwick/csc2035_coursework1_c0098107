@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeoutException;
 
 public class Client {
 	DatagramSocket socket;
@@ -295,9 +296,7 @@ public class Client {
 
 		try {
 			clientSocket = new DatagramSocket();
-		}
-
-		catch (SocketException e) {
+		} catch (SocketException e) {
 			System.err.println("The socket couldn't be connected or bind to the specified port " +
 					portNumber);
 			System.exit(1);
@@ -307,22 +306,21 @@ public class Client {
 
 		try {
 			reader = new Scanner(file);
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 
 		String input = "";
 
-		if (reader.hasNextLine()){
+		if (reader.hasNextLine()) {
 			input = reader.nextLine();
 		} else {
 			System.err.println("Input File is empty");
 			System.exit(0);
 		}
 
-		while (reader.hasNextLine()){
+		while (reader.hasNextLine()) {
 			input = input + "\n" + reader.nextLine();
 		}
 
@@ -342,10 +340,11 @@ public class Client {
 				tempSegmentedByte = new byte[4];
 			}
 
-			tempSegmentedByte[charCount] = inputbytes[i]; charCount++;
+			tempSegmentedByte[charCount] = inputbytes[i];
+			charCount++;
 		}
 
-		if (charCount != 0){
+		if (charCount != 0) {
 			ListOfByteSegments.add(tempSegmentedByte);
 		}
 
@@ -372,6 +371,10 @@ public class Client {
 		DatagramPacket receivedPacket = new DatagramPacket(ackBuffer, ackBuffer.length);
 		Segment ack;
 
+		TimeoutException timeoutException = new TimeoutException();
+
+		int timeOut = 5000;
+
 		int tryCount = 0;
 
 		while (tryCount != 4) {
@@ -382,48 +385,64 @@ public class Client {
 
 			for (int i = 0; i < segmentsArray.length; i++) {
 
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
-
-				ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
-
-				objectStream.writeObject(segmentsArray[i]);
-
-				byte[] data = outputStream.toByteArray();
-
-				DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
-
-				clientSocket.send(sentPacket);
-				clientSocket.receive(receivedPacket);
-
-				byte[] incomingData = receivedPacket.getData();
-				ByteArrayInputStream in = new ByteArrayInputStream(incomingData);
-				ObjectInputStream out = new ObjectInputStream(in);
-
 				try {
+					clientSocket.setSoTimeout(timeOut);
 
-					ack = (Segment) out.readObject();
+					ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 
-					if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq())
+					ObjectOutputStream objectStream = new ObjectOutputStream(outputStream);
 
-						System.out.println("Acknowledgement is recieved" + ack.getSq());
+					objectStream.writeObject(segmentsArray[i]);
 
-					else {
-						System.out.println("Acknowledgement is not recieved");
+					byte[] data = outputStream.toByteArray();
+
+					DatagramPacket sentPacket = new DatagramPacket(data, data.length, IPAddress, portNumber);
+
+					clientSocket.send(sentPacket);
+					clientSocket.receive(receivedPacket);
+
+					byte[] incomingData = receivedPacket.getData();
+					ByteArrayInputStream in = new ByteArrayInputStream(incomingData);
+					ObjectInputStream out = new ObjectInputStream(in);
+
+					try {
+
+
+						ack = (Segment) out.readObject();
+
+						if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq())
+
+							System.out.println("Acknowledgement is recieved" + ack.getSq());
+
+						else {
+							System.out.println("Acknowledgement is not recieved");
+						}
+
+					} catch (ClassNotFoundException e) {
+						System.out.println("socket not found");
 					}
 
-				} catch (ClassNotFoundException e) {
-					e.printStackTrace();
-				}
-			}
 
-			clientSocket.close();
+					//catch (ClassNotFoundException e) {
+					//System.out.println("socket failure");
+					//}
+
+				} catch (SocketTimeoutException e) {
+					System.out.println("timeout reached");
+
+				}
+
+			}
 
 		}
 
+		System.out.println("Retry Limit Reached");
+		System.exit(1);
 
+		clientSocket.close();
 
 		//exitErr("sendFileWithTimeOut is not implemented");
-	} 
 
+	}
 
 }
