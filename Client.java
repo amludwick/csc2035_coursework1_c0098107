@@ -377,7 +377,11 @@ public class Client {
 
 		int tryCount = 0;
 
-		while (tryCount != 4) {
+		int acks = 0;
+
+		boolean file_recieved = false;
+
+		while (tryCount != 4 && file_recieved == false) {
 
 			tryCount = tryCount + 1;
 
@@ -410,11 +414,12 @@ public class Client {
 
 						ack = (Segment) out.readObject();
 
-						if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq())
+						if (ack.getType() == SegmentType.Ack && ack.getSq() == segmentsArray[i].getSq()) {
 
 							System.out.println("Acknowledgement is recieved" + ack.getSq());
+							acks = acks + 1;
 
-						else {
+						} else {
 							System.out.println("Acknowledgement is not recieved");
 						}
 
@@ -432,14 +437,18 @@ public class Client {
 
 				}
 
+				if (acks == 3) {
+					System.out.println("File was sent with no issues");
+					file_recieved = true;
+				}
+
 			}
 
 		}
 
-		System.out.println("Retry Limit Reached");
-		System.exit(1);
 
 		clientSocket.close();
+		System.exit(1);
 
 		//exitErr("sendFileWithTimeOut is not implemented");
 
