@@ -265,6 +265,8 @@ public class Server {
 						myWriter.write(dataSeg.getPayLoad());
 						currentTotal = currentTotal + dataSeg.getSize();
 
+					} else {
+						duplicate = true;
 					}
 
 					tempAckSeg = ackSeg;
