@@ -446,7 +446,6 @@ public class Client {
 
 		}
 
-
 		clientSocket.close();
 		System.exit(1);
 

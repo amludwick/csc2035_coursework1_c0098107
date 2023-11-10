@@ -235,39 +235,50 @@ public class Server {
 
 			int x = checksum(dataSeg.getPayLoad());
 
-			//If the calculated checksum is same as that of received checksum then send corrosponding ack
-			if (x == dataSeg.getChecksum()) {
-				System.out.println("SERVER: Calculated checksum is " + x + "  VALID");
-				Segment ackSeg = new Segment();
+			boolean duplicate = false;
 
-				/* Prepare the Ack segment */
-				ackSeg.setSq(dataSeg.getSq());
-				ackSeg.setType(SegmentType.Ack);
-				System.out.println("SERVER: Sending an ACK with sq " + ackSeg.getSq());
+			if (isLost(loss) == false) {
 
-				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-				ObjectOutputStream os = new ObjectOutputStream(outputStream);
-				os.writeObject(ackSeg);
-				byte[] dataAck = outputStream.toByteArray();
-				DatagramPacket replyPacket = new DatagramPacket(dataAck, dataAck.length, IPAddress, port);
+				//If the calculated checksum is same as that of received checksum then send corrosponding ack
+				if (x == dataSeg.getChecksum()) {
+					System.out.println("SERVER: Calculated checksum is " + x + "  VALID");
+					Segment ackSeg = new Segment();
+					Segment tempAckSeg = new Segment();
 
-				/* Send the Ack segment */
-				socket.send(replyPacket);
+					if (ackSeg != tempAckSeg) {
 
-				/* write the payload of the data segment to output file */
-				myWriter.write(dataSeg.getPayLoad());
-				currentTotal = currentTotal + dataSeg.getSize();
+						/* Prepare the Ack segment */
+						ackSeg.setSq(dataSeg.getSq());
+						ackSeg.setType(SegmentType.Ack);
+						System.out.println("SERVER: Sending an ACK with sq " + ackSeg.getSq());
 
-				System.out.println("\t\t>>>>>>> NETWORK: ACK is sent successfully <<<<<<<<<");
-				System.out.println("------------------------------------------------");
-				System.out.println("------------------------------------------------");
+						ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+						ObjectOutputStream os = new ObjectOutputStream(outputStream);
+						os.writeObject(ackSeg);
+						byte[] dataAck = outputStream.toByteArray();
+						DatagramPacket replyPacket = new DatagramPacket(dataAck, dataAck.length, IPAddress, port);
 
-			} else {
-				System.out.println("SERVER: Calculated checksum is " + x + "  INVALID");
-				System.out.println("SERVER: Not sending any ACK ");
-				System.out.println("*************************** ");
+						/* Send the Ack segment */
+						socket.send(replyPacket);
+
+						/* write the payload of the data segment to output file */
+						myWriter.write(dataSeg.getPayLoad());
+						currentTotal = currentTotal + dataSeg.getSize();
+
+					}
+
+					tempAckSeg = ackSeg;
+
+					System.out.println("\t\t>>>>>>> NETWORK: ACK is sent successfully <<<<<<<<<");
+					System.out.println("------------------------------------------------");
+					System.out.println("------------------------------------------------");
+
+				} else {
+					System.out.println("SERVER: Calculated checksum is " + x + "  INVALID");
+					System.out.println("SERVER: Not sending any ACK ");
+					System.out.println("*************************** ");
+				}
 			}
-
 		}
 
 		System.out.println("SERVER: File copying complete\n");
